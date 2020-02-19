@@ -63,7 +63,7 @@ void create_response_on_get(std::string& response, const std::string& file_path)
         file.seekg (0, file.beg);
 
         response.append(patch::to_string(size));
-        response.append("\r\nContent-Type: text/html\r\n");
+        response.append("\r\nContent-Type: text/html\r\n\r\n");
         std::string buf;
         while(file >> buf){
             response.append(buf);
