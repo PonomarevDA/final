@@ -1,7 +1,7 @@
 #include <string.h>
-
 #include "server.hpp"
 #include "parser.hpp"
+#include "logger.hpp"
 
 
 Session::Session(boost::asio::io_service& io_service): socket_(io_service) {}
@@ -18,10 +18,9 @@ void Session::start(){
 
 void Session::handle_read(const boost::system::error_code& error, size_t bytes_transferred){
     if(!error){
-        //std::cout << "Session: heard: " << data_;
+        log_data(data_, bytes_transferred);
         http_parse_and_make_response(data_, bytes_transferred);
-        //std::cout << "Session: send: " << data_ << std::endl;
-
+        log_data(data_, bytes_transferred);
 
         boost::asio::async_write(
             socket_,

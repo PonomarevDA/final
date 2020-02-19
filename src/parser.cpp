@@ -21,16 +21,14 @@ void http_parse_and_make_response(char data[], size_t& bytes_transferred){
 
     // check if error request
     if(dir_right == end || *dir_right != ' '){
-        //std::cout << "can't find dir :(" << std::endl;
-        memcpy(data, response_404, sizeof(response_404));
-        bytes_transferred = sizeof(response_404);
+        memcpy(data, response_404, sizeof(response_404) - 1);
+        bytes_transferred = sizeof(response_404) - 1; // without '\0'
         return;
     }
 
     // define full path of file
     std::string path = get_directory();
     path.append(dir_left, dir_right - dir_left);
-    //std::cout << "path: " << path << std::endl;
 
     // create response
     std::string response;
@@ -54,11 +52,8 @@ void create_response_on_get(std::string& response, const std::string& file_path)
         ss << "Content-length: " << size << "\r\n";
         ss << "Content-Type: text/html\r\n";
         ss << "\r\n";
-
-        std::string buf;
-        while(file >> buf){
-            ss << buf;
-        }
+        ss << file.rdbuf();
+        file.close();
         response = ss.str();
     }else{
         response = response_404;
