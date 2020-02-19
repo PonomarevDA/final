@@ -14,7 +14,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(include)
 
 # add src files
-set(SRC_LIST src/server.cpp src/main.cpp)
+set(SRC_LIST src/server.cpp src/parser.cpp src/main.cpp)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)

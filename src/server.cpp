@@ -1,4 +1,7 @@
+#include <string.h>
+
 #include "server.hpp"
+#include "parser.hpp"
 
 
 Session::Session(boost::asio::io_service& io_service): socket_(io_service) {}
@@ -15,8 +18,11 @@ void Session::start(){
 
 void Session::handle_read(const boost::system::error_code& error, size_t bytes_transferred){
     if(!error){
-        std::cout << "Session: heard: \"" << data_ << "\"" << std::endl;
-        std::cout << "Session: send: \"" << data_ << "\"" << std::endl;
+        //std::cout << "Session: heard: " << data_;
+        http_parse_and_make_response(data_, bytes_transferred);
+        //std::cout << "Session: send: " << data_ << std::endl;
+
+
         boost::asio::async_write(
             socket_,
             boost::asio::buffer(data_, bytes_transferred),
@@ -48,7 +54,6 @@ Server::Server(boost::asio::io_service& io_service, tcp::endpoint end_point)
 }
 
 void Server::start_accept(){
-    std::cout << "Server: create session and accept." << std::endl;
     Session* new_session = new Session(io_service_);
     acceptor_.async_accept(
         new_session->get_socket(),
