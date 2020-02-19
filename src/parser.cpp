@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 
 #include "parser.hpp"
 
@@ -40,18 +41,28 @@ void http_parse_and_make_response(char data[], size_t& bytes_transferred){
     bytes_transferred = response.size();
 }
 
+// There is bug: to_string is not a member of std, says g++ (mingw), so we use patch::to_string
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm;
+        stm << n ;
+        return stm.str() ;
+    }
+}
+
 void create_response_on_get(std::string& response, const std::string& file_path){
     std::ifstream file(file_path.c_str());
     if(file.is_open()){
         response = "HTTP/1.0 200 OK\r\nContent-length: ";
 
-        const auto begin = file.tellg();
+        const int begin = file.tellg();
         file.seekg(0, file.end);
-        //const auto end = file.tellg();
-        const auto size = file.tellg();//(end-begin);
+        const int size = file.tellg();
         file.seekg (0, file.beg);
 
-        response.append(std::to_string(size));
+        response.append(patch::to_string(size));
         response.append("\r\nContent-Type: text/html\r\n");
         std::string buf;
         while(file >> buf){
