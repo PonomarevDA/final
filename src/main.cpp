@@ -48,7 +48,7 @@ void parse_args(int argc, char** argv){
 int main(int argc, char** argv){
     // parse args
     parse_args(argc, argv);
-    auto end_point = tcp::endpoint(ip, port);
+    tcp::endpoint end_point = tcp::endpoint(ip, port);
 
     // create daemon
     pid_t pid = fork();
