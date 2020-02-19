@@ -5,8 +5,7 @@
 
 #include "parser.hpp"
 
-static const char response_200[] = "HTTP/1.0 200 OK\r\nContent-length: 7\r\nContent-Type: text/html\r\n\r\n";
-static const char response_404[] = "HTTP/1.0 404 NOT FOUND\r\nContent-Type: text/html\r\n\r\n";
+static const char response_404[] = "HTTP/1.0 404 NOT FOUND\r\nContent-length: 0\r\nContent-Type: text/html\r\n\r\n";
 
 static std::string directory;
 
@@ -41,35 +40,28 @@ void http_parse_and_make_response(char data[], size_t& bytes_transferred){
     bytes_transferred = response.size();
 }
 
-// There is bug: to_string is not a member of std, says g++ (mingw), so we use patch::to_string
-namespace patch
-{
-    template < typename T > std::string to_string( const T& n )
-    {
-        std::ostringstream stm;
-        stm << n ;
-        return stm.str() ;
-    }
-}
-
 void create_response_on_get(std::string& response, const std::string& file_path){
     std::ifstream file(file_path.c_str());
-    if(file.is_open()){
-        response = "HTTP/1.0 200 OK\r\nContent-length: ";
 
+    if(file.is_open()){
         const int begin = file.tellg();
         file.seekg(0, file.end);
         const int size = file.tellg();
         file.seekg (0, file.beg);
 
-        response.append(patch::to_string(size));
-        response.append("\r\nContent-Type: text/html\r\n\r\n");
+        std::stringstream ss;
+        ss << "HTTP/1.0 200 OK\r\n";
+        ss << "Content-length: " << size << "\r\n";
+        ss << "Content-Type: text/html\r\n";
+        ss << "\r\n";
+
         std::string buf;
         while(file >> buf){
-            response.append(buf);
+            ss << buf;
         }
+        response = ss.str();
     }else{
-        response = response_200;
+        response = response_404;
     }
 }
 
