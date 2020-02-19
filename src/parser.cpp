@@ -41,7 +41,7 @@ void http_parse_and_make_response(char data[], size_t& bytes_transferred){
 }
 
 void create_response_on_get(std::string& response, const std::string& file_path){
-    std::ifstream file(file_path);
+    std::ifstream file(file_path.c_str());
     if(file.is_open()){
         response = "HTTP/1.0 200 OK\r\nContent-length: ";
 
