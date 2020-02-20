@@ -1,4 +1,5 @@
 #include <string.h>
+#include <unistd.h>
 #include "server.hpp"
 #include "parser.hpp"
 #include "logger.hpp"
@@ -47,8 +48,12 @@ void Session::handle_write(const boost::system::error_code& error){
 
 
 
-Server::Server(boost::asio::io_service& io_service, tcp::endpoint end_point)
+Server::Server(boost::asio::io_service& io_service, tcp::endpoint end_point, std::string directory)
     : io_service_(io_service), acceptor_(io_service, end_point) {
+    if(chroot(directory.c_str()) != 0) {
+         perror("chroot");
+         return;
+    }
     start_accept();
 }
 

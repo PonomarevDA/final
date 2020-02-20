@@ -7,39 +7,9 @@
 
 static const char response_404[] = "HTTP/1.0 404 NOT FOUND\r\nContent-length: 0\r\nContent-Type: text/html\r\n\r\n";
 
-static std::string directory;
-
-// very simple parser
-void http_parse_and_make_response(char data[], size_t& bytes_transferred){
-    // define file name
-    char* const dir_left = &data[4];
-    char* dir_right = &data[5];
-    const char* const end = data + bytes_transferred;
-    while((*dir_right != ' ') && (dir_right < end)){
-        dir_right++;
-    }
-
-    // check if error request
-    if(dir_right == end || *dir_right != ' '){
-        memcpy(data, response_404, sizeof(response_404) - 1);
-        bytes_transferred = sizeof(response_404) - 1; // without '\0'
-        return;
-    }
-
-    // define full path of file
-    std::string path = get_directory();
-    path.append(dir_left, dir_right - dir_left);
-
-    // create response
-    std::string response;
-    create_response_on_get(response, path);
-
-    memcpy(data, response.c_str(), response.size());
-    bytes_transferred = response.size();
-}
-
-void create_response_on_get(std::string& response, const std::string& file_path){
+void create_response_on_get(char data[], size_t& bytes_transferred, const std::string& file_path){
     std::ifstream file(file_path.c_str());
+    std::string response;
 
     if(file.is_open()){
         const int begin = file.tellg();
@@ -58,12 +28,28 @@ void create_response_on_get(std::string& response, const std::string& file_path)
     }else{
         response = response_404;
     }
+
+    memcpy(data, response.c_str(), response.size());
+    bytes_transferred = response.size();
 }
 
-void set_directory(std::string& dir){
-    directory = dir;
-}
+// very simple parser get command with or without parameters
+void http_parse_and_make_response(char data[], size_t& bytes_transferred){
+    std::string request(data, bytes_transferred);
 
-const std::string& get_directory(){
-    return directory;
+    std::string start_line = request.substr(0, request.find_first_of("\r\n"));
+
+    size_t left_uri_border = start_line.find(' ') + 1;
+    size_t right_uri_border = start_line.find(' ', left_uri_border) - 1;
+    std::string URI = start_line.substr(left_uri_border, right_uri_border + 1 - left_uri_border);
+
+    std::string file_path;
+    size_t question = URI.find("?");
+    if (question != std::string::npos) {
+        file_path = URI.substr(0, question);
+    }else{
+        file_path = URI;
+    }
+
+    create_response_on_get(data, bytes_transferred, file_path);
 }

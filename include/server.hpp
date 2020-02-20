@@ -23,7 +23,7 @@ private:
 
 class Server{
 public:
-    Server(boost::asio::io_service& io_service, tcp::endpoint end_point);
+    Server(boost::asio::io_service& io_service, tcp::endpoint end_point, std::string directory);
 private:
     void start_accept();
     void handle_accept(Session* new_session, const boost::system::error_code& error);

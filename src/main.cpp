@@ -16,31 +16,18 @@ void parse_args(int argc, char** argv){
 
     int c;
     while((c = getopt(argc, argv, "h:p:d:")) != -1){
-        switch(c){
-            case 'h':
-                if(optarg){
+        if(optarg){
+            switch(c){
+                case 'h':
                     ip = boost::asio::ip::address::from_string(optarg);
-                    //std::cout << "-h with ip = " << ip << "." << std::endl;
-                }else{
-                    //std::cout << "-h without ip :(" << std::endl;
-                }
-                break;
-            case 'p':
-                if(optarg){
+                    break;
+                case 'p':
                     port = atoi(optarg);
-                    //std::cout << "-p with port = " << port << "." << std::endl;
-                }else{
-                    //std::cout << "-p without port :(" << std::endl;
-                }
-                break;
-            case 'd':
-                if(optarg){
-                    //std::cout << "-d with directory = " << optarg << "." << std::endl;
+                    break;
+                case 'd':
                     directory = optarg;
-                }else{
-                    //std::cout << "-d without directory :(" << std::endl;
-                }
-                break;
+                    break;
+            }
         }
     }
 }
@@ -60,9 +47,7 @@ int main(int argc, char** argv){
 
     // create server
     boost::asio::io_service io_service;
-    using namespace std;
-    set_directory(directory);
-    Server s(io_service, end_point);
+    Server s(io_service, end_point, directory);
     io_service.run();
     return 0;
 }
