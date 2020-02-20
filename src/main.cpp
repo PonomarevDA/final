@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <thread>
 #include <unistd.h>
 #include "parser.hpp"
 #include "server.hpp"
@@ -32,6 +33,10 @@ void parse_args(int argc, char** argv){
     }
 }
 
+void io_service_thread(boost::asio::io_service& io_service){
+    io_service.run();
+}
+
 int main(int argc, char** argv){
     // parse args
     parse_args(argc, argv);
@@ -48,6 +53,7 @@ int main(int argc, char** argv){
     // create server
     boost::asio::io_service io_service;
     Server s(io_service, end_point, directory);
-    io_service.run();
+    std::thread t(io_service_thread, std::ref(io_service));
+    t.join();
     return 0;
 }
